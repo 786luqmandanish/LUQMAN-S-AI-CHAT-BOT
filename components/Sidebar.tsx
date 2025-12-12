@@ -1,14 +1,26 @@
 import React from 'react';
-import { Plus, MessageSquare, User, MoreHorizontal, Settings, X } from 'lucide-react';
-import { MOCK_HISTORY } from '../constants';
+import { Plus, MessageSquare, User, Settings, X, Trash2 } from 'lucide-react';
+import { ChatSession } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onNewChat: () => void;
+  sessions: ChatSession[];
+  currentSessionId: string | null;
+  onSelectSession: (id: string) => void;
+  onDeleteSession?: (id: string, e: React.MouseEvent) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNewChat }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  isOpen, 
+  onClose, 
+  onNewChat, 
+  sessions, 
+  currentSessionId, 
+  onSelectSession,
+  onDeleteSession 
+}) => {
   return (
     <>
       {/* Mobile Overlay */}
@@ -46,16 +58,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onNewChat }) 
         {/* History List */}
         <div className="flex-1 overflow-y-auto px-2 py-2 space-y-6 scrollbar-thin scrollbar-thumb-gray-800 hover:scrollbar-thumb-gray-700">
           <div>
-            <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent</h3>
+            <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">History</h3>
             <ul className="space-y-1">
-              {MOCK_HISTORY.map((item) => (
-                <li key={item.id}>
-                  <button className="flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg group transition-colors truncate">
-                    <MessageSquare size={16} className="text-gray-500 group-hover:text-indigo-400 transition-colors flex-shrink-0" />
-                    <span className="truncate">{item.title}</span>
-                  </button>
-                </li>
-              ))}
+              {sessions.length === 0 ? (
+                <li className="px-4 py-2 text-sm text-gray-500 italic">No previous chats</li>
+              ) : (
+                sessions.sort((a,b) => b.date - a.date).map((session) => (
+                  <li key={session.id} className="relative group">
+                    <button 
+                      onClick={() => onSelectSession(session.id)}
+                      className={`
+                        flex items-center gap-3 w-full px-4 py-3 text-left text-sm rounded-lg transition-colors truncate
+                        ${currentSessionId === session.id 
+                          ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/5' 
+                          : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}
+                      `}
+                    >
+                      <MessageSquare 
+                        size={16} 
+                        className={`flex-shrink-0 transition-colors ${currentSessionId === session.id ? 'text-emerald-400' : 'text-gray-600 group-hover:text-indigo-400'}`} 
+                      />
+                      <span className="truncate pr-4">{session.title}</span>
+                    </button>
+                    
+                    {/* Optional delete button */}
+                    {onDeleteSession && (
+                      <button 
+                        onClick={(e) => onDeleteSession(session.id, e)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete Chat"
+                      >
+                         <Trash2 size={14} />
+                      </button>
+                    )}
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>

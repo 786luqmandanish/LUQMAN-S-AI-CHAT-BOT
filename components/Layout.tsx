@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Menu } from 'lucide-react';
+import { ChatSession } from '../types';
+
+interface SidebarProps {
+  sessions: ChatSession[];
+  currentSessionId: string | null;
+  onSelectSession: (id: string) => void;
+  onDeleteSession?: (id: string, e: React.MouseEvent) => void;
+}
 
 interface LayoutProps {
   children: React.ReactNode;
   onNewChat: () => void;
+  sidebarProps?: SidebarProps; 
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, onNewChat }) => {
+export const Layout: React.FC<LayoutProps> = ({ children, onNewChat, sidebarProps }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
@@ -19,6 +28,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, onNewChat }) => {
           onNewChat();
           setIsSidebarOpen(false);
         }}
+        sessions={sidebarProps?.sessions || []}
+        currentSessionId={sidebarProps?.currentSessionId || null}
+        onSelectSession={(id) => {
+          sidebarProps?.onSelectSession(id);
+          setIsSidebarOpen(false); // Close sidebar on selection on mobile
+        }}
+        onDeleteSession={sidebarProps?.onDeleteSession}
       />
 
       <div className="flex-1 flex flex-col h-full relative min-w-0">

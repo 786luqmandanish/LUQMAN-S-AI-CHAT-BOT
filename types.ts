@@ -13,6 +13,13 @@ export interface Message {
   groundingChunks?: GroundingChunk[];
 }
 
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  date: number;
+}
+
 export interface ChatHistoryItem {
   id: string;
   title: string;
